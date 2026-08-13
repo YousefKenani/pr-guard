@@ -1,0 +1,14 @@
+{
+  "name": "pr-guard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "analyze:sample": "npm run build && node dist/index.js examples/sample.c",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  }
+}
