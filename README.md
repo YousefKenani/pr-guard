@@ -12,10 +12,21 @@ This phase creates the local analysis engine foundation:
 
 Later phases will add deterministic static rules, AI review, risk scoring, GitHub integration, and the web dashboard.
 
+## Phase 2
+
+This phase adds a deterministic static analyzer for C code. The current rules are heuristic, not a full compiler:
+
+- Unsafe C functions such as `gets`, `strcpy`, `strcat`, `sprintf`, and unsafe `scanf("%s")` usage.
+- Allocations with `malloc`, `calloc`, or `realloc` that do not have an obvious matching `free`.
+- Allocations that do not have an obvious null check.
+- Functions with high branch/loop complexity.
+
 ## Run locally
 
 ```bash
 npm install
 npm run build
 npm run analyze:sample
+npm run analyze:vulnerable
+npm run analyze:file -- examples/vulnerable.c
 ```

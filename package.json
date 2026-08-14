@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "analyze:file": "npm run build && node dist/index.js",
     "analyze:sample": "npm run build && node dist/index.js examples/sample.c",
+    "analyze:vulnerable": "npm run build && node dist/index.js examples/vulnerable.c",
     "build": "tsc"
   },
   "devDependencies": {
