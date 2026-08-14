@@ -1,15 +1,50 @@
+import { runAiAnalysis } from "./ai/analyzer.js";
 import { summarizeFindings } from "./risk.js";
 import { runStaticAnalysis } from "./static/index.js";
-import type { AnalysisInput, AnalysisResult, Finding } from "./types.js";
+import type {
+  AnalysisInput,
+  AnalysisOptions,
+  AnalysisResult,
+  AnalysisWarning,
+  Finding,
+} from "./types.js";
 
-export function analyzeCode(input: AnalysisInput): AnalysisResult {
-  const findings: Finding[] = runStaticAnalysis(input).sort(compareFindings);
+const defaultOptions: AnalysisOptions = {
+  includeAi: false,
+};
 
-  return {
+export async function analyzeCode(
+  input: AnalysisInput,
+  options: AnalysisOptions = defaultOptions,
+): Promise<AnalysisResult> {
+  const staticFindings = runStaticAnalysis(input);
+  const warnings: AnalysisWarning[] = [];
+  let aiFindings: Finding[] = [];
+
+  if (options.includeAi) {
+    try {
+      aiFindings = await runAiAnalysis(input);
+    } catch (error) {
+      warnings.push({
+        source: "ai",
+        message: error instanceof Error ? error.message : "AI analysis failed.",
+      });
+    }
+  }
+
+  const findings: Finding[] = [...staticFindings, ...aiFindings].sort(compareFindings);
+
+  const result: AnalysisResult = {
     file: input.file,
     findings,
     summary: summarizeFindings(findings),
   };
+
+  if (warnings.length > 0) {
+    result.warnings = warnings;
+  }
+
+  return result;
 }
 
 function compareFindings(left: Finding, right: Finding): number {

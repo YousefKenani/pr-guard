@@ -21,6 +21,29 @@ This phase adds a deterministic static analyzer for C code. The current rules ar
 - Allocations that do not have an obvious null check.
 - Functions with high branch/loop complexity.
 
+## Phase 3
+
+This phase adds an optional AI reviewer using the OpenAI Responses API with structured JSON output.
+
+The AI reviewer:
+
+- Reviews the supplied code for contextual correctness, security, memory/resource, error-handling, and maintainability risks.
+- Returns the same `Finding` shape as the static analyzer.
+- Is opt-in, so local static analysis still works without an API key.
+
+To enable AI review, set:
+
+```bash
+export OPENAI_API_KEY="your_api_key_here"
+export OPENAI_MODEL="gpt-5-nano"
+```
+
+Then run:
+
+```bash
+npm run analyze:file -- examples/vulnerable.c --ai
+```
+
 ## Run locally
 
 ```bash
@@ -29,4 +52,5 @@ npm run build
 npm run analyze:sample
 npm run analyze:vulnerable
 npm run analyze:file -- examples/vulnerable.c
+npm run analyze:file -- examples/vulnerable.c --ai
 ```

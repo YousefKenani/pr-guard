@@ -17,10 +17,20 @@ export interface AnalysisInput {
   code: string;
 }
 
+export interface AnalysisOptions {
+  includeAi: boolean;
+}
+
 export interface AnalysisResult {
   file: string;
   findings: Finding[];
   summary: RiskSummary;
+  warnings?: AnalysisWarning[];
+}
+
+export interface AnalysisWarning {
+  source: FindingSource;
+  message: string;
 }
 
 export interface RiskSummary {
