@@ -1,5 +1,5 @@
 import { runAiAnalysis } from "./ai/analyzer.js";
-import { summarizeFindings } from "./risk.js";
+import { calculateRisk } from "./risk/index.js";
 import { runStaticAnalysis } from "./static/index.js";
 import type {
   AnalysisInput,
@@ -37,7 +37,7 @@ export async function analyzeCode(
   const result: AnalysisResult = {
     file: input.file,
     findings,
-    summary: summarizeFindings(findings),
+    summary: calculateRisk(findings),
   };
 
   if (warnings.length > 0) {

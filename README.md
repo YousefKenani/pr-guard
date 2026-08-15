@@ -31,6 +31,17 @@ The AI reviewer:
 - Returns the same `Finding` shape as the static analyzer.
 - Is opt-in, so local static analysis still works without an API key.
 
+## Phase 4
+
+This phase adds the risk engine. The risk engine converts all findings into:
+
+- `riskScore`: a 0-100 score.
+- `riskLevel`: `low`, `medium`, `high`, or `critical`.
+- `rawScore`: the uncapped score before limiting to 100.
+- severity counts for the dashboard and future GitHub comments.
+
+The score uses severity weights plus small category/source adjustments, so security and memory findings affect the result more than simple maintainability findings.
+
 To enable AI review, set:
 
 ```bash
@@ -53,4 +64,5 @@ npm run analyze:sample
 npm run analyze:vulnerable
 npm run analyze:file -- examples/vulnerable.c
 npm run analyze:file -- examples/vulnerable.c --ai
+npm test
 ```

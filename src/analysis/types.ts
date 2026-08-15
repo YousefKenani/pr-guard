@@ -1,5 +1,7 @@
 export type Severity = "low" | "medium" | "high" | "critical";
 
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+
 export type FindingSource = "static" | "ai";
 
 export interface Finding {
@@ -36,4 +38,7 @@ export interface AnalysisWarning {
 export interface RiskSummary {
   totalFindings: number;
   bySeverity: Record<Severity, number>;
+  rawScore: number;
+  riskScore: number;
+  riskLevel: RiskLevel;
 }
