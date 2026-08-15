@@ -21,6 +21,7 @@ export interface AnalysisInput {
 
 export interface AnalysisOptions {
   includeAi: boolean;
+  mode?: "full" | "static-only";
 }
 
 export interface AnalysisResult {

@@ -21,7 +21,7 @@ export async function analyzeCode(
   const warnings: AnalysisWarning[] = [];
   let aiFindings: Finding[] = [];
 
-  if (options.includeAi) {
+  if (options.includeAi && options.mode !== "static-only") {
     try {
       aiFindings = await runAiAnalysis(input);
     } catch (error) {

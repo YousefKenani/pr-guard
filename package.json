@@ -5,11 +5,13 @@
   "type": "module",
   "scripts": {
     "analyze:file": "npm run build && node dist/index.js",
+    "analyze:pr": "npm run build && node dist/index.js --pr",
+    "analyze:repo": "npm run build && node dist/index.js --repo",
     "analyze:sample": "npm run build && node dist/index.js examples/sample.c",
     "analyze:vulnerable": "npm run build && node dist/index.js examples/vulnerable.c",
     "analyze:vulnerable:ai": "npm run build && node dist/index.js examples/vulnerable.c --ai",
     "build": "tsc",
-    "test": "npm run build && node --test dist/analysis/risk/calculator.test.js"
+    "test": "npm run build && node --test dist/analysis/risk/calculator.test.js dist/github/parse-url.test.js dist/github/diff.test.js dist/config/env.test.js"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

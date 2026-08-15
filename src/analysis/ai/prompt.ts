@@ -2,7 +2,7 @@ import type { AnalysisInput } from "../types.js";
 
 export function buildAiReviewPrompt(input: AnalysisInput): string {
   return [
-    "Analyze only the supplied C code.",
+    "Analyze only the supplied code.",
     "",
     "Identify real risks in these areas:",
     "- correctness bugs",
@@ -21,7 +21,7 @@ export function buildAiReviewPrompt(input: AnalysisInput): string {
     `File: ${input.file}`,
     "",
     "Code:",
-    "```c",
+    "```",
     input.code,
     "```",
   ].join("\n");
