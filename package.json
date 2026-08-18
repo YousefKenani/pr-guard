@@ -4,17 +4,28 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "analyze:file": "npm run build && node dist/index.js",
-    "analyze:pr": "npm run build && node dist/index.js --pr",
-    "analyze:repo": "npm run build && node dist/index.js --repo",
-    "analyze:sample": "npm run build && node dist/index.js examples/sample.c",
-    "analyze:vulnerable": "npm run build && node dist/index.js examples/vulnerable.c",
-    "analyze:vulnerable:ai": "npm run build && node dist/index.js examples/vulnerable.c --ai",
-    "build": "tsc",
+    "analyze:file": "npm run build:cli && node dist/index.js",
+    "analyze:pr": "npm run build:cli && node dist/index.js --pr",
+    "analyze:repo": "npm run build:cli && node dist/index.js --repo",
+    "analyze:sample": "npm run build:cli && node dist/index.js examples/sample.c",
+    "analyze:vulnerable": "npm run build:cli && node dist/index.js examples/vulnerable.c",
+    "analyze:vulnerable:ai": "npm run build:cli && node dist/index.js examples/vulnerable.c --ai",
+    "build": "npm run build:cli",
+    "build:cli": "tsc -p tsconfig.cli.json",
+    "build:web": "next build",
+    "dev": "next dev",
+    "typecheck": "tsc --noEmit",
     "test": "npm run build && node --test dist/analysis/risk/calculator.test.js dist/github/parse-url.test.js dist/github/diff.test.js dist/config/env.test.js"
+  },
+  "dependencies": {
+    "next": "^15.4.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
     "typescript": "^5.9.0"
   }
 }
