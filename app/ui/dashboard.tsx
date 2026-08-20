@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type RiskLevel = "low" | "medium" | "high" | "critical";
 type Mode = "repo" | "pr";
@@ -28,6 +28,20 @@ interface AnalysisWarning {
   message: string;
 }
 
+interface PersistedAnalysisSummary {
+  id: string;
+  targetType: "repository" | "pull_request";
+  owner: string;
+  repository: string;
+  pullNumber: number | null;
+  title: string;
+  url: string;
+  riskScore: number;
+  riskLevel: RiskLevel;
+  totalFindings: number;
+  createdAt: string;
+}
+
 interface RepositoryResult {
   repository: {
     fullName: string;
@@ -38,6 +52,7 @@ interface RepositoryResult {
   findings: Finding[];
   summary: AnalysisSummary;
   warnings?: AnalysisWarning[];
+  savedAnalysis?: PersistedAnalysisSummary | null;
 }
 
 interface PullRequestResult {
@@ -53,6 +68,7 @@ interface PullRequestResult {
   findings: Finding[];
   summary: AnalysisSummary;
   warnings?: AnalysisWarning[];
+  savedAnalysis?: PersistedAnalysisSummary | null;
 }
 
 type AnalysisResult = RepositoryResult | PullRequestResult;
@@ -64,8 +80,31 @@ export function Dashboard() {
   const [target, setTarget] = useState(defaultRepoUrl);
   const [includeAi, setIncludeAi] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [history, setHistory] = useState<PersistedAnalysisSummary[]>([]);
   const [error, setError] = useState("");
+  const [historyError, setHistoryError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    void loadHistory();
+  }, []);
+
+  async function loadHistory() {
+    try {
+      const response = await fetch("/api/history");
+      const data = (await response.json()) as { analyses?: PersistedAnalysisSummary[]; error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "History failed to load.");
+      }
+
+      setHistory(data.analyses ?? []);
+      setHistoryError("");
+    } catch (caught) {
+      setHistory([]);
+      setHistoryError(caught instanceof Error ? caught.message : "History failed to load.");
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -85,6 +124,7 @@ export function Dashboard() {
       }
 
       setResult(data as AnalysisResult);
+      await loadHistory();
     } catch (caught) {
       setResult(null);
       setError(caught instanceof Error ? caught.message : "Analysis failed.");
@@ -107,7 +147,7 @@ export function Dashboard() {
             <p className="eyebrow">PR Guard</p>
             <h1>Pull Request Risk Review</h1>
           </div>
-          <div className="status-pill">Phase 6</div>
+          <div className="status-pill">Phase 7</div>
         </header>
 
         <form className="analysis-form" onSubmit={handleSubmit}>
@@ -165,6 +205,8 @@ export function Dashboard() {
             </div>
           </section>
         )}
+
+        <HistoryPanel history={history} error={historyError} />
       </section>
     </main>
   );
@@ -258,6 +300,62 @@ function WarningsPanel({ warnings }: { warnings: AnalysisWarning[] }) {
       ))}
     </section>
   );
+}
+
+function HistoryPanel({
+  history,
+  error,
+}: {
+  history: PersistedAnalysisSummary[];
+  error: string;
+}) {
+  return (
+    <section className="panel history-panel">
+      <div className="panel-heading">
+        <p className="panel-label">Analysis History</p>
+        <strong>{history.length}</strong>
+      </div>
+
+      {error ? <p className="quiet">{error}</p> : null}
+
+      {!error && history.length === 0 ? (
+        <p className="quiet">No saved analyses yet.</p>
+      ) : (
+        <div className="history-list">
+          {history.map((analysis) => (
+            <a className="history-row" href={analysis.url} target="_blank" rel="noreferrer" key={analysis.id}>
+              <div>
+                <strong>{formatHistoryTitle(analysis)}</strong>
+                <span>{formatDate(analysis.createdAt)}</span>
+              </div>
+              <div className={`history-risk risk-text-${analysis.riskLevel}`}>
+                <strong>{analysis.riskScore}</strong>
+                <span>{analysis.riskLevel.toUpperCase()}</span>
+              </div>
+              <span>{analysis.totalFindings} findings</span>
+            </a>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function formatHistoryTitle(analysis: PersistedAnalysisSummary): string {
+  if (analysis.targetType === "pull_request" && analysis.pullNumber !== null) {
+    return `${analysis.owner}/${analysis.repository} #${analysis.pullNumber}`;
+  }
+
+  return `${analysis.owner}/${analysis.repository}`;
+}
+
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
 
 const severityRank: Record<RiskLevel, number> = {

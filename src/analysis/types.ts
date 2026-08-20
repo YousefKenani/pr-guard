@@ -32,7 +32,7 @@ export interface AnalysisResult {
 }
 
 export interface AnalysisWarning {
-  source: FindingSource;
+  source: FindingSource | "database";
   message: string;
 }
 

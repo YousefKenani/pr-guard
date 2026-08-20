@@ -70,6 +70,44 @@ npm run analyze:repo -- https://github.com/owner/repo
 npm run analyze:repo -- https://github.com/owner/repo --ai
 ```
 
+## Phase 6
+
+This phase adds the Next.js web dashboard.
+
+The dashboard:
+
+- Accepts either a repository URL or pull request URL.
+- Lets the user toggle AI review.
+- Calls `/api/analyze`.
+- Displays the risk score, target metadata, findings, and warnings.
+
+```bash
+npm run dev
+```
+
+Then open `http://localhost:3000`.
+
+## Phase 7
+
+This phase adds PostgreSQL-backed analysis history using Supabase.
+
+The database stores:
+
+- One `analyses` row per repository or pull request analysis.
+- Many `findings` rows connected to each analysis.
+- Risk score, risk level, target metadata, and creation time for the dashboard history.
+
+Create the tables by running the SQL in `supabase/schema.sql` inside the Supabase SQL editor.
+
+Then add these values to `.env`:
+
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+```
+
+If Supabase is not configured, analysis still works, but history will stay empty.
+
 To enable AI review, set:
 
 ```env
@@ -92,6 +130,8 @@ OPENAI_API_KEY=your_openai_api_key
 OPENAI_MODEL=gpt-5-nano
 GITHUB_TOKEN=your_github_token
 PR_GUARD_AI_MAX_FILES=3
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
 Shell exports still work and take priority over `.env` values.

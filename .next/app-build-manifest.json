@@ -11,10 +11,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/api/analyze/route": [
+    "/api/history/route": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/api/analyze/route.js"
+      "static/chunks/app/api/history/route.js"
     ]
   }
 }

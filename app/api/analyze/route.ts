@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadEnvFile } from "../../../src/config/env";
+import { saveAnalysis } from "../../../src/db/supabase";
+import type { PersistableAnalysisResult } from "../../../src/db/types";
 import { analyzePullRequestUrl, analyzeRepositoryUrl } from "../../../src/github/analyzer";
 import { isGithubPullRequestUrl, isGithubRepositoryUrl } from "../../../src/github/parse-url";
 
@@ -27,11 +29,15 @@ export async function POST(request: Request) {
     const options = { includeAi };
 
     if (mode === "pr" || (mode === "auto" && isGithubPullRequestUrl(target))) {
-      return NextResponse.json(await analyzePullRequestUrl(target, options));
+      const result = await analyzePullRequestUrl(target, options);
+
+      return NextResponse.json(await withSavedAnalysis(result, includeAi));
     }
 
     if (mode === "repo" || (mode === "auto" && isGithubRepositoryUrl(target))) {
-      return NextResponse.json(await analyzeRepositoryUrl(target, options));
+      const result = await analyzeRepositoryUrl(target, options);
+
+      return NextResponse.json(await withSavedAnalysis(result, includeAi));
     }
 
     return NextResponse.json(
@@ -43,5 +49,29 @@ export async function POST(request: Request) {
       { error: error instanceof Error ? error.message : "Analysis failed." },
       { status: 500 },
     );
+  }
+}
+
+async function withSavedAnalysis(result: PersistableAnalysisResult, includeAi: boolean) {
+  try {
+    return {
+      ...result,
+      savedAnalysis: await saveAnalysis({ result, includeAi }),
+    };
+  } catch (error) {
+    return {
+      ...result,
+      savedAnalysis: null,
+      warnings: [
+        ...(result.warnings ?? []),
+        {
+          source: "database",
+          message:
+            error instanceof Error
+              ? `Analysis completed, but history was not saved: ${error.message}`
+              : "Analysis completed, but history was not saved.",
+        },
+      ],
+    };
   }
 }
